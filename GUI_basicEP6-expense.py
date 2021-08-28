@@ -4,7 +4,7 @@ import csv
 from datetime import datetime
 
 GUI = Tk()
-GUI.title('โปรแกรมบันทึกค่าใช้จ่าย by EakTo8')
+GUI.title('โปรแกรมบันทึกค่าใช้จ่าย v1.0 by EakTo8')
 GUI.geometry('600x700+800+60')
 
 # B1 = Button(GUI, text='Hello')
@@ -22,6 +22,7 @@ filemenu.add_command(label="export csv")
 
 # Help
 def About():
+    print('About Menu')
     messagebox.showinfo('About','สวัสดีครับ โปรแกรมนี้คือโปรแกรมบันทึกรายการซื้อสินค้า\nสนใจติดต่อที่ คุณเอก Tel. 0932359294')
 
 helpmenu = Menu(menubar,tearoff=False)
