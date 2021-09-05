@@ -3,9 +3,20 @@ from tkinter import ttk,messagebox
 import csv
 from datetime import datetime
 
+
 GUI = Tk()
 GUI.title('โปรแกรมบันทึกค่าใช้จ่าย v1.0 by EakTo8')
-GUI.geometry('700x700+800+60')
+###GUI.geometry('700x650+800+40')
+
+w = 700
+h = 600
+
+w5 = GUI.winfo_screenwidth()
+h5 = GUI.winfo_screenheight()
+
+x = (w5/2) - (w/2)
+y = (h5/2) - (h/2) - 50
+GUI.geometry(f'{w}x{h}+{x:.0f}+{y:.0f}')
 
 # B1 = Button(GUI, text='Hello')
 # B1.pack(ipadx=50,ipady=10)  # .pack ติดปุ่มกับ GUI
@@ -202,26 +213,31 @@ def updateCSV():
 
 
 def delete_record(event=None):
-    check = messagebox.askyesno('Confirm','คุณต้องการลบข้อมูลใช่หรือไม่?')
-    print('YES/NO:',check)
-    if check == True:
-        print('delete')
+    try:
         select = tv_csv.selection()   # กดที่รายการในตาราง
         #print(select)
         data = tv_csv.item(select)
         data = data['values']
         transctionid = data[0]
-        #print(transctionid)
-        del alltransection[str(transctionid)]
-        #print(alltransection)
-        updateCSV()
-        update_table()
-    else:
-        print('Cancel')
+        name_item = data[2]
+        check = messagebox.askyesno('Confirm',f'คุณต้องการลบข้อมูล >>{name_item}<< ใช่หรือไม่?')
+        print('YES/NO:',check)
+        if check == True:
+            print('delete')
+            
+            #print(transctionid)
+            del alltransection[str(transctionid)]
+            #print(alltransection)
+            updateCSV()
+            update_table()
+        else:
+            print('Cancel')
+    except:
+        print('คุณยังไม่ได้เลือกรายการ')
 
 
-btn_delete = ttk.Button(T2,text='delete',command=delete_record)
-btn_delete.place(x=50,y=550)       
+# btn_delete = ttk.Button(T2,text='delete',command=delete_record)
+# btn_delete.place(x=50,y=550)       
 
 tv_csv.bind('<Delete>',delete_record)
 
@@ -237,6 +253,105 @@ def update_table():
         print(alltransection)
     except:
         print('No FIle')
+
+
+#########  Right click Menu################
+
+def editRecord():
+    POPUP = Toplevel()
+    POPUP.title('Edit Record')
+    #POPUP.geometry('450x350+400+100')
+
+    w = 450
+    h = 350
+
+    w5 = POPUP.winfo_screenwidth()
+    h5 = POPUP.winfo_screenheight()
+
+    x = (w5/2) - (w/2)
+    y = (h5/2) - (h/2) - 50
+    POPUP.geometry(f'{w}x{h}+{x:.0f}+{y:.0f}')
+
+    #---------Img---------
+    img_icon = PhotoImage(file='asset/img/POPUP_edit.png')
+    main_icon = ttk.Label(POPUP,image=img_icon)
+    main_icon.pack()
+
+    # (1) ----------  Tab -----------------#
+    #---------text---------
+    L = ttk.Label(POPUP,text='รายการค่าใช้จ่าย',font=FONT1).pack()
+    v_expense = StringVar()
+    # StringVar() ตัวแปลพิเศษสำหรับเก็บข้อมมูฃใน GUI
+    E1 = ttk.Entry(POPUP,textvariable=v_expense,font=FONT1)
+    E1.pack()
+
+    #---------text/---------
+    L2 = ttk.Label(POPUP,text='ราคา (บาท)',font=FONT1).pack()
+    v_price = StringVar()
+    # StringVar() ตัวแปลพิเศษสำหรับเก็บข้อมมูฃใน GUI
+    E2 = ttk.Entry(POPUP,textvariable=v_price,font=FONT1)
+    E2.pack()
+
+    #---------text/---------
+    L3 = ttk.Label(POPUP,text='จำนวน',font=FONT1).pack()
+    v_qty = StringVar()
+    # StringVar() ตัวแปลพิเศษสำหรับเก็บข้อมมูฃใน GUI
+    E3 = ttk.Entry(POPUP,textvariable=v_qty,font=FONT1)
+    E3.pack()
+    # ---------------
+
+    # (2)----------  Btn Save -----------------#
+    def Edit(event=None):
+        #print(transctionid)
+        #print(alltransection)
+        olddata = alltransection[str(transctionid)]
+        print('OLD:',olddata)
+        V1 = v_expense.get()
+        V2 = v_price.get()
+        V3 = v_qty.get()
+        total = float(V2) * float(V3)
+        newdata = [olddata[0],olddata[1],V1,V2,V3,total]
+        alltransection[str(transctionid)] = newdata
+        updateCSV()
+        update_table()
+        POPUP.destroy()  # สั่งปิด popup 
+
+    POPUP.bind('<Return>',Edit)
+
+    icon_b1 = PhotoImage(file='asset/img/b1_save.png')
+
+    B2 = ttk.Button(POPUP, text=f'{"save":>{10}}',image=icon_b1,compound='left',command=Edit)
+    B2.pack(ipadx=50,ipady=10,pady=20)
+
+    # get data in selected record
+    select = tv_csv.selection()   # กดที่รายการในตาราง
+    #print(select)
+    data = tv_csv.item(select)
+    data = data['values']
+    print(data)
+    transctionid = data[0]
+
+    # สั่งเช็คค่าไว้ตรงช่อกรอก
+    v_expense.set(data[2])
+    v_price.set(data[3])
+    v_qty.set(data[4])
+
+
+    POPUP.mainloop()
+
+rightclick = Menu(GUI,tearoff=False)
+rightclick.add_command(label='Edit',command=editRecord)
+rightclick.add_command(label='Delete',command=delete_record)
+rightclick.add_command(label='Refresh',command=update_table)
+
+def menupopup(event):
+    #print(event.x_root,event.y_root)
+    rightclick.post(event.x_root, event.y_root)
+
+
+tv_csv.bind('<Button-3>',menupopup)  #Button-3  -> คลิ๊กขวา
+
+
 
 update_table()
 
