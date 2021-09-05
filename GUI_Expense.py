@@ -2,14 +2,43 @@ from tkinter import *
 from tkinter import ttk,messagebox
 import csv
 from datetime import datetime
+#######Database#########
+import sqlite3
 
+#database
+conn = sqlite3.connect('expense.sqlite3')
+
+# ตัวดำเนินการ
+c = conn.cursor()
+
+# create table
+#FEILD = ['id(transectionid)','วันเวลา(stamp)','รายการ(title)','ค่าใช้จ่าย(expense)','จำนวน(quantity)','รวม(total)']
+c.execute(""" CREATE TABLE IF NOT EXISTS expenselite (
+                ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                transectionid TEXT,
+                stamp DATETIME,
+                title TEXT,
+                expense REAL,
+                quantity INTEGER,
+                total REAL
+            )""")
+
+def insert_expense(transctionid,stamp,title,expense,quantity,total):
+    ID = None
+    with conn:
+        c.execute(""" INSERT INTO expenselite VALUES(?,?,?,?,?,?,?)""",
+                (ID,transctionid,stamp,title,expense,quantity,total))
+    conn.commit()  # การบันทึกข้อมูลลงในฐานข้อมูล 
+    print('Insert Success')
+
+###############
 
 GUI = Tk()
 GUI.title('โปรแกรมบันทึกค่าใช้จ่าย v1.0 by EakTo8')
 ###GUI.geometry('700x650+800+40')
 
 w = 700
-h = 600
+h = 650
 
 w5 = GUI.winfo_screenwidth()
 h5 = GUI.winfo_screenheight()
@@ -98,6 +127,9 @@ def Save(event=None):  #line 85
         stamp = datetime.now()
         dt = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         tansectioid = stamp.strftime('%Y%m%d%H%M%f')
+
+        insert_expense(tansectioid,dt,expense,float(price),int(qty),total)
+
         with open('savedata.csv','a',encoding='utf-8',newline='') as f:
             # with สั่งเปิดไฟล์ แล้วปิดอัตโนมัติ
             # 'a'  การบันทึกเรื่อยๆ เพิ่มข้อมูลต่อจากข้อมูลเก่า
